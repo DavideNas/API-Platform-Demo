@@ -2,8 +2,8 @@ FROM jenkins/jenkins:lts-jdk21
 
 USER root
 
-# Installiamo i prerequisiti, la CLI di Docker e la CLI di kubectl
-RUN apt-get update && apt-get install -y ca-certificates curl gnupg && \
+# Installiamo i prerequisiti, la CLI di Docker, la CLI di kubectl e Python
+RUN apt-get update && apt-get install -y ca-certificates curl gnupg python3 python3-venv && \
     # 1. Configurazione chiavi e repository Docker
     install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \

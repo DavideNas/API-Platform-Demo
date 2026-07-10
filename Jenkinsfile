@@ -10,14 +10,11 @@ pipeline {
     }
 
     options {
-        // evita che build sovrapposte sullo stesso branch corrano in parallelo
         disableConcurrentBuilds()
-        // tiene solo le ultime 10 build, per non riempire il disco di Jenkins
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
@@ -36,7 +33,7 @@ pipeline {
                     '''
                 }
             }
-            post {
+           post {
                 always {
                     junit 'app/test-results.xml'
                 }
@@ -53,27 +50,21 @@ pipeline {
 
         stage('Scan Image') {
             steps {
-                // Placeholder per uno scanner reale (es. Trivy). Vedi nota sotto.
                 sh """
                     echo "Eseguo scan di sicurezza sull'immagine ${FULL_IMAGE}..."
-                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \\
+                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
                     aquasec/trivy:latest image --exit-code 0 --severity HIGH,CRITICAL ${FULL_IMAGE} || true
                 """
             }
         }
 
-
-	stage('Push Image') {
-	    steps {
-	        withCredentials([usernamePassword(
-                    credentialsId: 'registry-creds',
-                    usernameVariable: 'REG_USER',
-                    passwordVariable: 'REG_PASS'
-                )]) {
-            
-                    sh '''
-                        docker push registry.devplatform.local:80/api-platform-demo:10
-                    '''
+        stage('Push Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'registry-creds', usernameVariable: 'REG_USER', passwordVariable: 'REG_PASS')]) {
+                    sh """
+                        echo "${REG_PASS}" | docker login ${REGISTRY}:80 -u "${REG_USER}" --password-stdin
+                        docker push ${FULL_IMAGE}
+                    """
                 }
             }
         }
@@ -81,12 +72,13 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig-devplatform', variable: 'KUBECONFIG_FILE')]) {
-                    sh '''
-                        export KUBECONFIG=$KUBECONFIG_FILE
-                        kubectl -n ${KUBE_NAMESPACE} set image deployment/api-platform-demo \
-                            api-platform-demo=${FULL_IMAGE} --record
+                    // Usiamo i doppi apici per interpolare ${KUBE_NAMESPACE} e ${FULL_IMAGE}, 
+                    // e mettiamo il backslash davanti a \$KUBECONFIG_FILE per farlo leggere a Bash e non a Jenkins.
+                    sh """
+                        export KUBECONFIG=\$KUBECONFIG_FILE
+                        kubectl -n ${KUBE_NAMESPACE} set image deployment/api-platform-demo api-platform-demo=${FULL_IMAGE}
                         kubectl -n ${KUBE_NAMESPACE} rollout status deployment/api-platform-demo --timeout=120s
-                    '''
+                    """
                 }
             }
         }
