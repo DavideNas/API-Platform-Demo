@@ -55,9 +55,9 @@ pipeline {
             steps {
                 // Placeholder per uno scanner reale (es. Trivy). Vedi nota sotto.
                 sh """
-                    echo 'Eseguo scan di sicurezza sull\\'immagine ${FULL_IMAGE}...'
-                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-                      aquasec/trivy:latest image --exit-code 0 --severity HIGH,CRITICAL ${FULL_IMAGE} || true
+                    echo "Eseguo scan di sicurezza sull'immagine ${FULL_IMAGE}..."
+                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \\
+                    aquasec/trivy:latest image --exit-code 0 --severity HIGH,CRITICAL ${FULL_IMAGE} || true
                 """
             }
         }
