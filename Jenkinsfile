@@ -72,10 +72,7 @@ pipeline {
                 )]) {
             
                     sh '''
-                        if [ -n "$REG_USER" ]; then
-                            docker login registry.devplatform.local:80 -u "$REG_USER" -p "$REG_PASS"
-                        fi
-                        docker push registry.devplatform.local:80/api-platform-demo:9
+                        docker push registry.devplatform.local:80/api-platform-demo:10
                     '''
                 }
             }
