@@ -57,13 +57,13 @@ pipeline {
                 """
             }
         }
-        
+
         stage('Push Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'registry-creds', usernameVariable: 'REG_USER', passwordVariable: 'REG_PASS')]) {
-                    // Usiamo le virgolette doppie ed eseguiamo l'escape del carattere $ (\$)
-                    sh "echo \$REG_PASS | docker login \$REGISTRY:80 -u \$REG_USER --password-stdin"
-                    sh "docker push \$FULL_IMAGE"
+                    // Apici singoli: Jenkins non tocca nulla, ci pensa Bash a leggere le variabili d'ambiente
+                    sh 'echo "$REG_PASS" | docker login "$REGISTRY:80" -u "$REG_USER" --password-stdin'
+                    sh 'docker push "$FULL_IMAGE"'
                 }
             }
         }
