@@ -1,0 +1,57 @@
+services:
+  jenkins:
+    build: .
+    # image: jenkins/jenkins:lts-jdk21
+    container_name: jenkins
+    restart: unless-stopped
+    user: root                      # necessario per poter usare la Docker socket dall'interno di Jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock   # permette a Jenkins di lanciare comandi docker sull'host
+      # - /usr/bin/docker              # espone il binario docker dentro il container Jenkins
+    networks:
+      - infra-net
+
+  registry:
+    image: registry:2
+    container_name: registry
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: "Registry Realm"
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+    volumes:
+      - registry_data:/var/lib/registry
+      - ./registry-auth:/auth:ro
+    networks:
+      - infra-net
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: infra-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - jenkins
+      - registry
+    networks:
+      - infra-net
+
+volumes:
+  jenkins_home:
+  registry_data:
+
+networks:
+  infra-net:
+    external: true
