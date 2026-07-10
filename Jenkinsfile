@@ -5,7 +5,7 @@ pipeline {
         REGISTRY        = "registry.devplatform.local"
         IMAGE_NAME       = "api-platform-demo"
         IMAGE_TAG        = "${env.BUILD_NUMBER}"
-        FULL_IMAGE       = "${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+        FULL_IMAGE       = "${REGISTRY}:80/${IMAGE_NAME}:${IMAGE_TAG}"
         KUBE_NAMESPACE   = "api-platform"
     }
 
