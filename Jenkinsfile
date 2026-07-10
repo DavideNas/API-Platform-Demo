@@ -62,25 +62,26 @@ pipeline {
             }
         }
 
+
 	stage('Push Image') {
-            steps {
-                withCredentials([usernamePassword(
+	    steps {
+	        withCredentials([usernamePassword(
                     credentialsId: 'registry-creds',
                     usernameVariable: 'REG_USER',
                     passwordVariable: 'REG_PASS'
                 )]) {
-                    // Usiamo """ al posto di '''
-                    sh """
-                        if [ -n "\$REG_USER" ]; then
-                            echo "\$REG_PASS" | docker login ${REGISTRY}:80 -u "\$REG_USER" --password-stdin
+            
+                    sh '''
+                        if [ -n "$REG_USER" ]; then
+                            docker login registry.devplatform.local:80 -u "$REG_USER" -p "$REG_PASS"
                         fi
-                        docker push ${FULL_IMAGE}
-                    """
+                        docker push registry.devplatform.local:80/api-platform-demo:9
+                    '''
                 }
             }
         }
 
-	stage('Deploy to Kubernetes') {
+        stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig-devplatform', variable: 'KUBECONFIG_FILE')]) {
                     sh '''
