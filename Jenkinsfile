@@ -61,10 +61,11 @@ pipeline {
         stage('Push Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'registry-creds', usernameVariable: 'REG_USER', passwordVariable: 'REG_PASS')]) {
-                    sh """
-                        echo "\$REG_PASS" | docker login ${REGISTRY}:80 -u "\$REG_USER" --password-stdin
+                    // Usiamo i tripli apici singoli per non dover fare l'escape del $
+                    sh '''
+                        echo "$REG_PASS" | docker login ${REGISTRY}:80 -u "$REG_USER" --password-stdin
                         docker push ${FULL_IMAGE}
-                    """
+                    '''
                 }
             }
         }
