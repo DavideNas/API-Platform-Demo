@@ -32,7 +32,7 @@ pipeline {
                         . .venv/bin/activate
                         pip install --upgrade pip
                         pip install -r requirements.txt
-                        pytest -v --junitxml=test-results.xml
+                        python3 -m pytest -v --junitxml=test-results.xml
                     '''
                 }
             }
