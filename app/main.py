@@ -4,6 +4,7 @@ from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 import time
 import os
 
+# Creo una app per visualizzare le metriche prometheus
 app = FastAPI(
       title="API Platform Demo",
       description="Servizio dimostrativo per la pipeline CI/CD + Kubernetes",

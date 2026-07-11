@@ -28,6 +28,7 @@ services:
       REGISTRY_AUTH: htpasswd
       REGISTRY_AUTH_HTPASSWD_REALM: "Registry Realm"
       REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      REGISTRY_HTTP_SECRET: "una_stringa_segreta_qualsiasi_12345"
     volumes:
       - registry_data:/var/lib/registry
       - ./registry-auth:/auth:ro
